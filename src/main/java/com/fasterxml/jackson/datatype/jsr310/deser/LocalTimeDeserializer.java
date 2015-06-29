@@ -23,8 +23,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 
 /**
  * Deserializer for Java 8 temporal {@link LocalTime}s.
@@ -56,6 +59,9 @@ public class LocalTimeDeserializer extends JSR310DateTimeDeserializerBase<LocalT
     {
         switch(parser.getCurrentToken())
         {
+            case VALUE_NUMBER_INT:
+                Long epochMilli = parser.getLongValue();
+                return LocalTime.ofSecondOfDay(Instant.ofEpochMilli(epochMilli).getLong(ChronoField.SECOND_OF_DAY));
             case START_ARRAY:
                 if(parser.nextToken() == JsonToken.END_ARRAY)
                     return null;

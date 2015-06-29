@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 
@@ -55,24 +56,7 @@ public class LocalDateTimeSerializer extends JSR310FormattedSerializerBase<Local
             throws IOException
     {
         if (useTimestamp(provider)) {
-            generator.writeStartArray();
-            generator.writeNumber(dateTime.getYear());
-            generator.writeNumber(dateTime.getMonthValue());
-            generator.writeNumber(dateTime.getDayOfMonth());
-            generator.writeNumber(dateTime.getHour());
-            generator.writeNumber(dateTime.getMinute());
-            if(dateTime.getSecond() > 0 || dateTime.getNano() > 0)
-            {
-                generator.writeNumber(dateTime.getSecond());
-                if(dateTime.getNano() > 0)
-                {
-                    if(provider.isEnabled(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS))
-                        generator.writeNumber(dateTime.getNano());
-                    else
-                        generator.writeNumber(dateTime.get(ChronoField.MILLI_OF_SECOND));
-                }
-            }
-            generator.writeEndArray();
+            generator.writeNumber(dateTime.toEpochSecond(ZoneOffset.UTC)*1000);
         } else {
             String str = (_formatter == null) ? dateTime.toString() : dateTime.format(_formatter);
             generator.writeString(str);
