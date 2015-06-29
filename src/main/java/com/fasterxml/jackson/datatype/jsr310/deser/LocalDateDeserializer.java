@@ -24,10 +24,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 
 /**
  * Deserializer for Java 8 temporal {@link LocalDate}s.
@@ -35,8 +33,7 @@ import java.time.temporal.ChronoField;
  * @author Nick Williams
  * @since 2.2.0
  */
-public class LocalDateDeserializer extends JSR310DateTimeDeserializerBase<LocalDate>
-{
+public class LocalDateDeserializer extends JSR310DateTimeDeserializerBase<LocalDate> {
     private static final long serialVersionUID = 1L;
 
     public static final LocalDateDeserializer INSTANCE = new LocalDateDeserializer();
@@ -53,33 +50,40 @@ public class LocalDateDeserializer extends JSR310DateTimeDeserializerBase<LocalD
     protected JsonDeserializer<LocalDate> withDateFormat(DateTimeFormatter dtf) {
         return new LocalDateDeserializer(dtf);
     }
-    
+
     @Override
-    public LocalDate deserialize(JsonParser parser, DeserializationContext context) throws IOException
-    {
-        switch(parser.getCurrentToken())
-        {
+    public LocalDate deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        switch (parser.getCurrentToken()) {
             case VALUE_NUMBER_INT:
                 Long epochMilli = parser.getLongValue();
                 return Instant.ofEpochMilli(epochMilli.longValue()).atZone(ZoneOffset.UTC).toLocalDate();
             case START_ARRAY:
-                if(parser.nextToken() == JsonToken.END_ARRAY)
+                if (parser.nextToken() == JsonToken.END_ARRAY)
                     return null;
-                int year = parser.getIntValue();
 
-                parser.nextToken();
-                int month = parser.getIntValue();
+                // [2015,05,05]
+                if (parser.getNumberType() == JsonParser.NumberType.INT) {
+                    int year = parser.getIntValue();
 
-                parser.nextToken();
-                int day = parser.getIntValue();
+                    parser.nextToken();
+                    int month = parser.getIntValue();
 
-                if(parser.nextToken() != JsonToken.END_ARRAY)
-                    throw context.wrongTokenException(parser, JsonToken.END_ARRAY, "Expected array to end.");
-                return LocalDate.of(year, month, day);
+                    parser.nextToken();
+                    int day = parser.getIntValue();
+
+                    if (parser.nextToken() != JsonToken.END_ARRAY)
+                        throw context.wrongTokenException(parser, JsonToken.END_ARRAY, "Expected array to end.");
+                    return LocalDate.of(year, month, day);
+                } else if (parser.getNumberType() == JsonParser.NumberType.LONG) {
+                    // [145872634723]
+                    return Instant.ofEpochMilli(parser.getLongValue()).atZone(ZoneOffset.UTC).toLocalDate();
+                }
+
+                throw context.wrongTokenException(parser, parser.getCurrentToken(), "Expected int on long in array.");
 
             case VALUE_STRING:
                 String string = parser.getText().trim();
-                if(string.length() == 0) {
+                if (string.length() == 0) {
                     return null;
                 }
                 return LocalDate.parse(string, _formatter);
