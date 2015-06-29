@@ -61,7 +61,7 @@ public class LocalDateDeserializer extends JSR310DateTimeDeserializerBase<LocalD
         {
             case VALUE_NUMBER_INT:
                 Long epochMilli = parser.getLongValue();
-                return LocalDate.ofEpochDay(Instant.ofEpochMilli(epochMilli).getLong(ChronoField.EPOCH_DAY));
+                return Instant.ofEpochMilli(epochMilli.longValue()).atZone(ZoneOffset.UTC).toLocalDate();
             case START_ARRAY:
                 if(parser.nextToken() == JsonToken.END_ARRAY)
                     return null;

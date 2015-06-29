@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -53,9 +54,7 @@ public class LocalDateSerializer extends JSR310FormattedSerializerBase<LocalDate
     {
         if (useTimestamp(provider)) {
             generator.writeStartArray();
-            generator.writeNumber(date.getYear());
-            generator.writeNumber(date.getMonthValue());
-            generator.writeNumber(date.getDayOfMonth());
+            generator.writeNumber(date.atStartOfDay(ZoneOffset.UTC).toEpochSecond()*1000);
             generator.writeEndArray();
         } else {
             String str = (_formatter == null) ? date.toString() : date.format(_formatter);
