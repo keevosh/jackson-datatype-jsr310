@@ -17,14 +17,12 @@
 package com.fasterxml.jackson.datatype.jsr310.ser;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 
 /**
  * Serializer for Java 8 temporal {@link LocalDateTime}s.
