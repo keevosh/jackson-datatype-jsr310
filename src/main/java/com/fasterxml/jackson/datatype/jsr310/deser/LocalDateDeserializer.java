@@ -76,7 +76,12 @@ public class LocalDateDeserializer extends JSR310DateTimeDeserializerBase<LocalD
                     return LocalDate.of(year, month, day);
                 } else if (parser.getNumberType() == JsonParser.NumberType.LONG) {
                     // [145872634723]
-                    return Instant.ofEpochMilli(parser.getLongValue()).atZone(ZoneOffset.UTC).toLocalDate();
+                    long dateInMillis = parser.getLongValue();
+
+                    if (parser.nextToken() != JsonToken.END_ARRAY)
+                        throw context.wrongTokenException(parser, JsonToken.END_ARRAY, "Expected array to end.");
+
+                    return Instant.ofEpochMilli(dateInMillis).atZone(ZoneOffset.UTC).toLocalDate();
                 }
 
                 throw context.wrongTokenException(parser, parser.getCurrentToken(), "Expected int on long in array.");
